@@ -3,7 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NumPad Typing Test</title>
+
+<!-- ============================================================
+     SEO TITLE
+     ============================================================ -->
+<title>Numpad Typing Test - Free 10-Key Typing Practice | NumpadFlow</title>
+
+<!-- ============================================================
+     META DESCRIPTION
+     ============================================================ -->
+<meta name="description" content="Free Numpad Typing Test and 10-Key Typing Practice. Improve numeric keypad typing speed, accuracy and data entry skills with NumpadFlow.">
+
+<!-- ============================================================
+     ROBOTS
+     ============================================================ -->
+<meta name="robots" content="index, follow">
+
+<!-- ============================================================
+     CANONICAL
+     ============================================================ -->
+<link rel="canonical" href="https://raselranamistri.github.io/numpadflow/">
+
+<!-- ============================================================
+     OPEN GRAPH
+     ============================================================ -->
+<meta property="og:title" content="Numpad Typing Test - Free 10-Key Typing Practice | NumpadFlow">
+<meta property="og:description" content="Free Numpad Typing Test and 10-Key Typing Practice. Improve numeric keypad typing speed, accuracy and data entry skills with NumpadFlow.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://raselranamistri.github.io/numpadflow/">
+<meta property="og:site_name" content="NumpadFlow">
+
+<!-- ============================================================
+     THEME COLOR
+     ============================================================ -->
+<meta name="theme-color" content="#0e0f12">
+
+<!-- ============================================================
+     FAVICON (inline SVG, no external file needed)
+     ============================================================ -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2322d3ee'/%3E%3Ctext x='50' y='74' font-size='64' font-family='Arial,sans-serif' font-weight='900' text-anchor='middle' fill='%230a0d10'%3EN%3C/text%3E%3C/svg%3E">
+
+<!-- ============================================================
+     STRUCTURED DATA (JSON-LD)
+     ============================================================ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://raselranamistri.github.io/numpadflow/#website",
+      "url": "https://raselranamistri.github.io/numpadflow/",
+      "name": "NumpadFlow",
+      "description": "Free Numpad Typing Test and 10-Key Typing Practice.",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://raselranamistri.github.io/numpadflow/#webapp",
+      "url": "https://raselranamistri.github.io/numpadflow/",
+      "name": "NumpadFlow",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript",
+      "description": "Free online Numpad Typing Test and 10-key typing practice tool for improving numeric keypad speed, accuracy and data entry skills.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
@@ -435,18 +508,19 @@
        ========================================================= */
     body.mode-desktop {
         display: flex;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
         padding: clamp(6px, 1vh, 14px);
-        overflow: hidden;
-        height: 100vh;
+        min-height: 100vh;
+        overflow-x: hidden;
     }
 
     body.mode-desktop .app {
         width: 100%;
         max-width: min(96vw, 1080px);
-        max-height: 100%;
-        height: 100%;
+        height: calc(100vh - 2 * clamp(6px, 1vh, 14px));
+        max-height: calc(100vh - 2 * clamp(6px, 1vh, 14px));
+        flex-shrink: 0;
         border-radius: clamp(8px, 1vh, 14px);
         padding: clamp(10px, 1.6vh, 20px);
         gap: clamp(5px, 0.9vh, 12px);
@@ -810,14 +884,106 @@
         body.mode-mobile .key.tall { min-height: 84px; }
         body.mode-mobile .stat-box .value { font-size: 0.95rem; }
     }
+
+    /* =========================================================
+       SEO CONTENT (below the tool) — clean, readable, theme-aware
+       ========================================================= */
+    .seo-wrap {
+        width: 100%;
+        max-width: min(96vw, 1080px);
+        margin: 28px 0 48px;
+        padding: 0 clamp(10px, 1.6vh, 20px);
+        color: var(--text);
+    }
+    body.mode-mobile .seo-wrap {
+        max-width: 100%;
+        margin: 18px 0 28px;
+        padding: 0 4px;
+    }
+
+    .seo-wrap .intro {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 8px;
+    }
+    .seo-wrap .intro p {
+        color: var(--text);
+        font-size: 0.95rem;
+        line-height: 1.7;
+        font-weight: 500;
+    }
+
+    .seo-wrap h2 {
+        color: var(--accent);
+        font-size: 1.05rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin: 28px 0 10px;
+    }
+    .seo-wrap h3 {
+        color: var(--text);
+        font-size: 0.95rem;
+        font-weight: 800;
+        margin: 16px 0 6px;
+    }
+    .seo-wrap p {
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.75;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+    .seo-wrap ul {
+        padding-left: 20px;
+        margin: 6px 0 14px;
+    }
+    .seo-wrap li {
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.7;
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+    .seo-wrap section { margin-bottom: 6px; }
+
+    /* FAQ */
+    .seo-wrap .faq {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 22px;
+        margin-top: 28px;
+    }
+    .seo-wrap .faq h2 { margin-top: 0; }
+    .seo-wrap .faq dl { margin: 0; }
+    .seo-wrap .faq dt {
+        color: var(--text);
+        font-weight: 800;
+        font-size: 0.9rem;
+        margin-top: 14px;
+    }
+    .seo-wrap .faq dt:first-of-type { margin-top: 0; }
+    .seo-wrap .faq dd {
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.65;
+        font-weight: 500;
+        margin: 4px 0 0;
+    }
 </style>
 </head>
 <body class="mode-desktop">
 
-<div class="app">
+<!-- ============================================================
+     MAIN APP (NumpadFlow tool)
+     ============================================================ -->
+<main class="app">
     <header>
-        <h1>NumPad <span class="accent">Typing Test</span></h1>
-        <div class="controls">
+        <h1>Numpad <span class="accent">Typing Test &amp; Practice</span></h1>
+        <nav class="controls" aria-label="Typing test controls">
             <div class="control-group">
                 <label>Mode</label>
                 <button class="mode-btn active" data-mode="test">Test</button>
@@ -844,33 +1010,33 @@
             <button class="theme-btn" id="theme-open-btn">
                 <span class="theme-icon">🎨</span> Theme
             </button>
-        </div>
+        </nav>
     </header>
 
-    <div class="stats-grid">
+    <section class="stats-grid" aria-label="Typing statistics">
         <div class="stat-box"><div class="label">CPM</div><div class="value" id="cpm">0</div></div>
         <div class="stat-box"><div class="label">WPM</div><div class="value" id="wpm">0</div></div>
         <div class="stat-box"><div class="label">Accuracy</div><div class="value" id="accuracy">100%</div></div>
         <div class="stat-box"><div class="label">Errors</div><div class="value" id="errors">0</div></div>
         <div class="stat-box"><div class="label" data-label="time">Time</div><div class="value" id="time">60s</div></div>
         <div class="stat-box"><div class="label">Rows</div><div class="value" id="completed-rows">0</div></div>
-    </div>
+    </section>
 
-    <main class="typing-area">
+    <section class="typing-area" aria-label="Numpad typing test area">
         <div class="rows-viewport">
             <div class="rows-container" id="rows-container"></div>
         </div>
-    </main>
+    </section>
 
-    <div class="training-guide">
+    <section class="training-guide" aria-label="Training guide">
         <span class="gi">🎯 <strong>Type the middle row</strong></span>
         <span class="gs">·</span>
         <span class="gi">↵ <strong>NUMPAD ENTER</strong> to advance</span>
         <span class="gs">·</span>
         <span class="gi">❌ <strong>Wrong key = red</strong></span>
-    </div>
+    </section>
 
-    <div class="numpad-container">
+    <section class="numpad-container" aria-label="On-screen numeric keypad">
         <div class="numpad">
             <div class="key num" data-code="NumLock">Num</div>
             <div class="key" data-code="NumpadDivide">/</div>
@@ -894,12 +1060,87 @@
             <div class="key wide" data-code="Numpad0">0</div>
             <div class="key" data-code="NumpadDecimal">.</div>
         </div>
-    </div>
+    </section>
 
     <footer>
         <p>Press <strong>NUMPAD ENTER</strong> after completing the middle row.</p>
         <button class="restart-btn" id="restart-btn">Restart</button>
     </footer>
+</main>
+
+<!-- ============================================================
+     SEO CONTENT (visible, user-focused, not keyword stuffed)
+     ============================================================ -->
+<div class="seo-wrap">
+
+    <!-- Introduction -->
+    <section class="intro" aria-label="Introduction to NumpadFlow">
+        <p><strong>NumpadFlow</strong> is a free online Numpad Typing Test and practice tool designed to help you improve numeric keypad speed, accuracy and 10-key data entry skills. Practice with your physical Numpad and track your typing performance.</p>
+    </section>
+
+    <!-- What is a Numpad Typing Test -->
+    <section aria-labelledby="what-is-heading">
+        <h2 id="what-is-heading">What is a Numpad Typing Test?</h2>
+        <p>A Numpad typing test measures how quickly and accurately you can enter numbers using the numeric keypad on your keyboard. Instead of typing letters, it focuses on the number pad — the 10-key grid on the right side of most full-size keyboards — so it trains the exact hand and finger movements used in numeric data entry.</p>
+        <p>A typical test shows you a sequence of digits and records your speed (CPM or WPM), accuracy and errors as you type. Numpad typing tests are useful for accountants, bookkeepers, data entry clerks, cashiers, spreadsheet users, students and anyone who regularly types numbers into a computer.</p>
+    </section>
+
+    <!-- How to Improve -->
+    <section aria-labelledby="how-to-heading">
+        <h2 id="how-to-heading">How to Improve Numpad Typing Speed</h2>
+        <p>Improving Numpad speed is mostly about accuracy, repetition and correct finger placement. A few practical habits can help:</p>
+        <ul>
+            <li>Keep your fingers resting on the numeric keypad home row: <strong>4, 5, 6</strong>.</li>
+            <li>Learn the numeric keypad layout until you can find each digit without looking down.</li>
+            <li>Focus on accuracy first — speed follows naturally once mistakes drop.</li>
+            <li>Practice in short, regular sessions rather than long, occasional ones.</li>
+            <li>Use a physical Numpad whenever possible to build real muscle memory.</li>
+            <li>Use the Numpad Enter key to finish each row without moving your hand.</li>
+            <li>Keep a steady rhythm instead of typing in bursts.</li>
+        </ul>
+    </section>
+
+    <!-- 10-Key Typing Test -->
+    <section aria-labelledby="tenkey-heading">
+        <h2 id="tenkey-heading">10-Key Typing Test</h2>
+        <p>A 10-key typing test measures how fast and accurately you can enter numbers using a 10-key numeric keypad. Regular 10-key practice improves finger placement, rhythm and numeric data entry confidence — useful for spreadsheet work, invoicing, bookkeeping and other number-heavy tasks. NumpadFlow lets you run 30-second, 1-minute, 2-minute and 5-minute 10-key typing tests, with live WPM, CPM, accuracy and error tracking.</p>
+    </section>
+
+    <!-- Numeric Keyboard Typing Practice -->
+    <section aria-labelledby="numeric-keyboard-heading">
+        <h2 id="numeric-keyboard-heading">Numeric Keyboard Typing Practice</h2>
+        <p>Numeric keyboard typing practice helps you build familiarity with the number pad region of a standard keyboard. In <strong>Simple</strong> mode, NumpadFlow presents digits 0–9. In <strong>Mixed</strong> mode, it also includes the numeric keypad operators (<code>+ - * /</code>) so you can train the full keypad layout. Practice Mode removes the timer so you can focus purely on accuracy and finger placement.</p>
+    </section>
+
+    <!-- FAQ (visible to users, not hidden) -->
+    <article class="faq" aria-labelledby="faq-heading">
+        <h2 id="faq-heading">Numpad Typing Test FAQ</h2>
+        <dl>
+            <dt>What is a Numpad Typing Test?</dt>
+            <dd>A Numpad Typing Test is a numeric typing exercise that measures how fast and accurately you enter numbers using the numeric keypad on your keyboard.</dd>
+
+            <dt>What is a 10-Key Typing Test?</dt>
+            <dd>A 10-key typing test is a numeric data entry test that uses the 10 keys of the numeric keypad (0–9) to measure speed and accuracy.</dd>
+
+            <dt>What is a Numeric Keyboard Typing Test?</dt>
+            <dd>It is a typing test that focuses on the numeric keypad section of a keyboard rather than the letter keys, training the specific fingers used for numbers.</dd>
+
+            <dt>How can I improve my Numpad typing speed?</dt>
+            <dd>Practice regularly with your physical Numpad, focus on accuracy before speed, and keep your fingers on the 4-5-6 home row so each digit is a short, consistent movement.</dd>
+
+            <dt>How can I practice 10-key typing?</dt>
+            <dd>Use NumpadFlow's Practice Mode and type each row with your physical numeric keypad, pressing Enter to advance to the next row. Repeat short sessions regularly to build muscle memory.</dd>
+
+            <dt>Can I use a physical Numpad with NumpadFlow?</dt>
+            <dd>Yes. NumpadFlow is built for physical Numpad use and responds to standard Numpad number keys, operators and Numpad Enter, with an on-screen keypad as a visual guide.</dd>
+
+            <dt>Is NumpadFlow free?</dt>
+            <dd>Yes. NumpadFlow is a free online Numpad typing test and practice tool with no account required.</dd>
+
+            <dt>What is the difference between a Numpad and a regular keyboard?</dt>
+            <dd>The Numpad is the numeric keypad section on the right side of most full-size keyboards. A regular keyboard includes both the letter keys and the numeric keypad, while compact or tenkeyless keyboards may omit the Numpad entirely.</dd>
+        </dl>
+    </article>
 </div>
 
 <!-- ===================== THEME MODAL ===================== -->
