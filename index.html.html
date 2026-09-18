@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NumPad Typing Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+    /* =========================================================
+       THEME VARIABLES
+       ========================================================= */
+    :root {
+        --bg: #0e0f12;
+        --panel: #16181c;
+        --card: #1d2026;
+        --text: #f5f7fa;
+        --muted: #8b93a1;
+        --accent: #22d3ee;
+        --accent-text: #0a0d10;
+        --accent-soft: rgba(34,211,238,0.14);
+        --success: #4ade80;
+        --error: #ef4444;
+        --error-soft: rgba(239,68,68,0.18);
+        --enter: #22d3ee;
+        --enter-soft: rgba(34,211,238,0.14);
+        --key: #242830;
+        --key-text: #a7aebc;
+        --key-hover: #2e333c;
+        --border: #2a2f38;
+        --shadow: rgba(0,0,0,0.6);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+    html { height: 100%; }
+    body {
+        min-height: 100vh;
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        font-weight: 600;
+        transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    /* =========================================================
+       SHARED APP BASE
+       ========================================================= */
+    .app {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    h1 {
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--text);
+        transition: color 0.4s ease;
+    }
+    h1 .accent { color: var(--accent); transition: color 0.4s ease; }
+
+    .controls {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .control-group {
+        display: flex;
+        background: var(--card);
+        border: 1px solid var(--border);
+        align-items: center;
+        transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    .control-group > label {
+        color: var(--muted);
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 1px;
+        transition: color 0.4s ease;
+    }
+
+    .mode-btn, .time-btn, .display-btn {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        transition: all 0.2s ease;
+    }
+
+    .mode-btn:hover, .time-btn:hover, .display-btn:hover {
+        color: var(--text);
+        background: var(--key-hover);
+    }
+
+    .mode-btn.active, .time-btn.active, .display-btn.active {
+        background: var(--accent);
+        color: var(--accent-text);
+        font-weight: 800;
+    }
+
+    .theme-btn {
+        background: var(--card);
+        color: var(--text);
+        border: 1px solid var(--border);
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+    .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .theme-icon { font-size: 0.95em; }
+
+    /* Compact display-mode toggle */
+    .display-mode-group {
+        display: flex;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 3px;
+        gap: 3px;
+        transition: background 0.4s ease, border-color 0.4s ease;
+    }
+    .display-btn {
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+
+    /* =========================================================
+       STATS
+       ========================================================= */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        width: 100%;
+    }
+
+    .stat-box {
+        background: var(--card);
+        border: 1px solid var(--border);
+        text-align: center;
+        transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    .stat-box .label {
+        color: var(--muted);
+        text-transform: uppercase;
+        font-weight: 700;
+        transition: color 0.4s ease;
+    }
+
+    .stat-box .value {
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+        font-weight: 800;
+        color: var(--text);
+        line-height: 1.15;
+        transition: color 0.4s ease;
+    }
+
+    .stat-box .value.bump { animation: statBump 0.35s ease; }
+    @keyframes statBump {
+        0% { transform: scale(1); }
+        40% { transform: scale(1.15); color: var(--accent); }
+        100% { transform: scale(1); }
+    }
+    .stat-box .value.flash-error { animation: errFlash 0.35s ease; }
+    @keyframes errFlash {
+        0%, 100% { color: var(--text); }
+        50% { color: var(--error); }
+    }
+
+    /* =========================================================
+       TYPING AREA
+       ========================================================= */
+    .typing-area {
+        background: var(--card);
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: background 0.4s ease, border-color 0.4s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .rows-viewport {
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        justify-content: center;
+    }
+
+    .rows-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+        font-weight: 800;
+        transition: opacity 0.25s ease;
+    }
+
+    .row:nth-child(1) { opacity: 0.4; }
+    .row:nth-child(2) { opacity: 1; }
+    .row:nth-child(3) { opacity: 0.85; }
+    .row:nth-child(4) { opacity: 0.6; }
+
+    .char {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        color: var(--text);
+        line-height: 1;
+        transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .row:nth-child(2) .char.current {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--accent-text);
+        box-shadow: none;
+        text-shadow: none;
+        animation: none;
+    }
+
+    .row:nth-child(2) .char.completed,
+    .row:nth-child(1) .char.completed {
+        color: var(--success);
+        opacity: 1;
+    }
+    .row:nth-child(1) .char.completed { opacity: 0.85; }
+
+    .char.pop { animation: charPop 0.3s ease; }
+    @keyframes charPop {
+        0% { transform: scale(1); }
+        45% { transform: scale(1.18); }
+        100% { transform: scale(1); }
+    }
+
+    .row:nth-child(2) .char.error {
+        background: var(--error);
+        border-color: var(--error);
+        color: #ffffff;
+        animation: shake 0.3s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-6px); }
+        75% { transform: translateX(6px); }
+    }
+
+    /* ===================== ENTER INDICATOR ===================== */
+    .enter-indicator {
+        display: none;
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--accent-text);
+        background: var(--accent);
+        border: 2px solid var(--accent);
+        border-radius: 8px;
+        white-space: nowrap;
+    }
+    .enter-indicator.visible {
+        display: inline-block;
+        animation: enterIn 0.3s ease;
+    }
+    @keyframes enterIn {
+        from { transform: scale(0.8); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+    }
+
+    /* =========================================================
+       TRAINING GUIDE
+       ========================================================= */
+    .training-guide {
+        background: var(--card);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-weight: 600;
+        transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+    }
+    .training-guide .gi { display: inline-flex; align-items: center; gap: 5px; }
+    .training-guide .gi strong { color: var(--text); font-weight: 800; transition: color 0.4s ease; }
+    .training-guide .gs { color: var(--border); }
+
+    /* =========================================================
+       NUMPAD
+       ========================================================= */
+    .numpad-container {
+        display: flex;
+        justify-content: center;
+    }
+    .numpad {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        background: var(--card);
+        border: 1px solid var(--border);
+        transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    .key {
+        background: var(--key);
+        border: 1px solid var(--border);
+        text-align: center;
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+        font-weight: 700;
+        color: var(--key-text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.1s ease;
+    }
+    .key:hover { background: var(--key-hover); color: var(--text); }
+    .key.active {
+        background: var(--accent);
+        color: var(--accent-text);
+        border-color: var(--accent);
+        transform: scale(0.94);
+    }
+    .key.tall { grid-row: span 2; flex-direction: column; justify-content: center; }
+    .key.wide { grid-column: span 2; }
+    .key.num  { grid-column: span 2; }
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+    footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--border);
+        transition: border-color 0.4s ease;
+    }
+    footer p { color: var(--muted); font-weight: 600; transition: color 0.4s ease; }
+    footer p strong { color: var(--text); font-weight: 800; letter-spacing: 0.5px; }
+
+    .restart-btn {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        cursor: pointer;
+        font-family: inherit;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: all 0.2s ease;
+    }
+    .restart-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .restart-btn:active { transform: scale(0.97); }
+
+    /* =========================================================
+       OVERLAY
+       ========================================================= */
+    .test-complete {
+        position: absolute;
+        inset: 0;
+        background: var(--card);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        border-radius: inherit;
+        animation: overlayFade 0.3s ease;
+    }
+    .test-complete h2 {
+        color: var(--accent);
+        font-weight: 800;
+        letter-spacing: 1px;
+        transition: color 0.4s ease;
+    }
+    .test-complete p { color: var(--text); font-weight: 600; }
+    @keyframes overlayFade { from { opacity: 0; } to { opacity: 1; } }
+
+    /* =========================================================
+       RGB GAMER MODE
+       ========================================================= */
+    .rgb-mode .row:nth-child(2) .char.current,
+    .rgb-mode .enter-indicator.visible,
+    .rgb-mode .key.active {
+        animation: rgbHue 10s linear infinite;
+    }
+    .rgb-mode .enter-indicator.visible {
+        animation: enterIn 0.3s ease, rgbHue 10s linear infinite;
+    }
+    @keyframes rgbHue {
+        from { filter: hue-rotate(0deg); }
+        to   { filter: hue-rotate(360deg); }
+    }
+
+    /* =========================================================
+       🖥️ DESKTOP MODE
+       ========================================================= */
+    body.mode-desktop {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: clamp(6px, 1vh, 14px);
+        overflow: hidden;
+        height: 100vh;
+    }
+
+    body.mode-desktop .app {
+        width: 100%;
+        max-width: min(96vw, 1080px);
+        max-height: 100%;
+        height: 100%;
+        border-radius: clamp(8px, 1vh, 14px);
+        padding: clamp(10px, 1.6vh, 20px);
+        gap: clamp(5px, 0.9vh, 12px);
+        box-shadow: 0 12px 32px var(--shadow);
+        overflow: hidden;
+    }
+
+    body.mode-desktop header { gap: clamp(5px, 0.9vh, 12px); }
+    body.mode-desktop h1 { font-size: clamp(0.85rem, 1.5vh + 0.3vw, 1.15rem); }
+    body.mode-desktop .controls { gap: clamp(4px, 0.6vh, 10px); }
+
+    body.mode-desktop .control-group {
+        gap: clamp(3px, 0.5vh, 6px);
+        padding: clamp(2px, 0.4vh, 4px);
+        border-radius: 7px;
+    }
+    body.mode-desktop .control-group > label {
+        font-size: clamp(0.55rem, 0.9vh, 0.68rem);
+        padding-left: clamp(6px, 0.8vw, 10px);
+    }
+    body.mode-desktop .mode-btn,
+    body.mode-desktop .time-btn {
+        padding: clamp(4px, 0.7vh, 7px) clamp(9px, 1vw, 14px);
+        font-size: clamp(0.68rem, 1.05vh, 0.82rem);
+        border-radius: 5px;
+    }
+    body.mode-desktop .theme-btn {
+        padding: clamp(5px, 0.9vh, 9px) clamp(10px, 1.2vw, 16px);
+        font-size: clamp(0.68rem, 1.05vh, 0.82rem);
+        border-radius: 7px;
+    }
+    body.mode-desktop .display-mode-group { padding: 3px; gap: 3px; border-radius: 7px; }
+    body.mode-desktop .display-btn {
+        width: clamp(26px, 2.8vh, 34px);
+        height: clamp(24px, 2.8vh, 32px);
+        font-size: clamp(0.75rem, 1.4vh, 1rem);
+        border-radius: 5px;
+    }
+
+    body.mode-desktop .stats-grid { gap: clamp(4px, 0.7vh, 10px); }
+    body.mode-desktop .stat-box {
+        padding: clamp(4px, 0.9vh, 10px) clamp(4px, 0.5vw, 8px);
+        border-radius: 7px;
+    }
+    body.mode-desktop .stat-box .label {
+        font-size: clamp(0.5rem, 0.85vh, 0.62rem);
+        letter-spacing: 1px;
+        margin-bottom: 2px;
+    }
+    body.mode-desktop .stat-box .value { font-size: clamp(0.85rem, 1.85vh, 1.3rem); }
+
+    body.mode-desktop .typing-area {
+        flex: 1 1 auto;
+        min-height: 0;
+        padding: clamp(6px, 1.2vh, 16px);
+        border-radius: clamp(7px, 1vh, 10px);
+    }
+    body.mode-desktop .rows-viewport { flex: 1 1 auto; min-height: 0; height: auto; }
+    body.mode-desktop .rows-container {
+        gap: clamp(5px, 1vh, 12px);
+        justify-content: center;
+        height: 100%;
+    }
+    body.mode-desktop .row {
+        height: clamp(34px, 5.6vh, 54px);
+        gap: clamp(7px, 0.9vw, 14px);
+        font-size: clamp(1.15rem, 3vh, 2rem);
+    }
+    body.mode-desktop .char {
+        width: clamp(30px, 3vw, 44px);
+        height: clamp(34px, 5.2vh, 50px);
+        border-radius: clamp(5px, 0.7vh, 8px);
+    }
+    body.mode-desktop .enter-indicator {
+        margin-left: clamp(8px, 1vw, 16px);
+        padding: clamp(4px, 0.7vh, 7px) clamp(8px, 1vw, 14px);
+        font-size: clamp(0.6rem, 1.1vh, 0.78rem);
+        letter-spacing: 1.2px;
+        border-radius: 6px;
+    }
+    body.mode-desktop .training-guide {
+        padding: clamp(4px, 0.7vh, 8px) clamp(8px, 1vw, 14px);
+        gap: clamp(6px, 0.9vw, 12px);
+        font-size: clamp(0.6rem, 1vh, 0.76rem);
+        border-radius: 7px;
+        flex-shrink: 0;
+    }
+    body.mode-desktop .numpad-container { flex-shrink: 0; }
+    body.mode-desktop .numpad {
+        gap: clamp(3px, 0.5vh, 5px);
+        padding: clamp(5px, 0.9vh, 10px);
+        border-radius: clamp(6px, 1vh, 10px);
+    }
+    body.mode-desktop .key {
+        padding: clamp(5px, 1vh, 10px) clamp(6px, 0.8vw, 12px);
+        font-size: clamp(0.7rem, 1.3vh, 1rem);
+        border-radius: clamp(4px, 0.6vh, 6px);
+        min-width: clamp(30px, 3.4vw, 50px);
+    }
+    body.mode-desktop footer {
+        padding-top: clamp(4px, 0.8vh, 10px);
+        flex-shrink: 0;
+    }
+    body.mode-desktop footer p { font-size: clamp(0.6rem, 1vh, 0.78rem); }
+    body.mode-desktop .restart-btn {
+        padding: clamp(4px, 0.8vh, 8px) clamp(10px, 1.3vw, 18px);
+        font-size: clamp(0.6rem, 1vh, 0.78rem);
+        border-radius: 5px;
+    }
+    body.mode-desktop .test-complete h2 { font-size: clamp(1.1rem, 2.6vh, 1.7rem); }
+    body.mode-desktop .test-complete p  { font-size: clamp(0.75rem, 1.3vh, 0.95rem); }
+
+    /* =========================================================
+       📱 MOBILE MODE
+       ========================================================= */
+    body.mode-mobile {
+        display: block;
+        padding: 8px;
+        min-height: 100vh;
+    }
+    body.mode-mobile .app {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 12px;
+        padding: 12px;
+        gap: 12px;
+        box-shadow: 0 8px 24px var(--shadow);
+    }
+    body.mode-mobile header { gap: 10px; }
+    body.mode-mobile h1 {
+        font-size: 0.95rem;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+    body.mode-mobile .controls { gap: 6px; width: 100%; }
+    body.mode-mobile .control-group { gap: 4px; padding: 3px; border-radius: 8px; }
+    body.mode-mobile .control-group > label { font-size: 0.6rem; padding-left: 8px; }
+    body.mode-mobile .mode-btn,
+    body.mode-mobile .time-btn { padding: 6px 10px; font-size: 0.72rem; border-radius: 6px; }
+    body.mode-mobile .theme-btn { padding: 7px 12px; font-size: 0.72rem; border-radius: 8px; }
+    body.mode-mobile .display-mode-group { padding: 3px; gap: 3px; }
+    body.mode-mobile .display-btn { width: 34px; height: 32px; font-size: 1rem; border-radius: 6px; }
+
+    body.mode-mobile .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    body.mode-mobile .stat-box { padding: 8px 4px; border-radius: 8px; }
+    body.mode-mobile .stat-box .label {
+        font-size: 0.55rem;
+        letter-spacing: 0.8px;
+        margin-bottom: 2px;
+    }
+    body.mode-mobile .stat-box .value { font-size: 1.05rem; }
+
+    body.mode-mobile .typing-area { padding: 12px 8px; border-radius: 10px; }
+    body.mode-mobile .rows-viewport { height: 220px; }
+    body.mode-mobile .rows-container { gap: 6px; justify-content: center; height: 100%; }
+    body.mode-mobile .row { height: 46px; gap: 6px; font-size: 1.4rem; }
+    body.mode-mobile .char { width: 32px; height: 42px; border-radius: 6px; }
+    body.mode-mobile .enter-indicator {
+        margin-left: 6px;
+        padding: 4px 8px;
+        font-size: 0.6rem;
+        letter-spacing: 1px;
+        border-radius: 5px;
+    }
+    body.mode-mobile .training-guide {
+        padding: 8px 10px;
+        gap: 6px;
+        font-size: 0.68rem;
+        border-radius: 8px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    body.mode-mobile .training-guide .gs { display: none; }
+    body.mode-mobile .training-guide .gi { width: 100%; }
+
+    body.mode-mobile .numpad-container { width: 100%; }
+    body.mode-mobile .numpad {
+        gap: 4px;
+        padding: 8px;
+        border-radius: 10px;
+        width: 100%;
+    }
+    body.mode-mobile .key {
+        padding: 10px 4px;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        min-width: 0;
+        min-height: 44px;
+    }
+    body.mode-mobile .key.tall { min-height: 92px; }
+
+    body.mode-mobile footer {
+        padding-top: 10px;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+    body.mode-mobile footer p { font-size: 0.68rem; text-align: center; }
+    body.mode-mobile .restart-btn {
+        padding: 10px 16px;
+        font-size: 0.78rem;
+        border-radius: 8px;
+        width: 100%;
+        min-height: 44px;
+    }
+    body.mode-mobile .test-complete h2 { font-size: 1.3rem; }
+    body.mode-mobile .test-complete p  { font-size: 0.82rem; text-align: center; padding: 0 12px; }
+
+    /* =========================================================
+       THEME MODAL
+       ========================================================= */
+    .theme-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.72);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 20px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    .theme-modal.open { display: flex; opacity: 1; }
+
+    .theme-panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        width: 100%;
+        max-width: 460px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+        animation: panelIn 0.25s ease;
+        transition: background 0.4s ease, border-color 0.4s ease;
+    }
+    @keyframes panelIn {
+        from { transform: translateY(10px); opacity: 0; }
+        to   { transform: translateY(0); opacity: 1; }
+    }
+
+    .theme-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .theme-header h2 {
+        font-size: 1rem;
+        color: var(--text);
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        font-weight: 800;
+    }
+    .theme-close {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+    .theme-close:hover { color: var(--error); border-color: var(--error); }
+
+    .theme-subtitle {
+        font-size: 0.75rem;
+        color: var(--muted);
+        font-weight: 600;
+        margin-top: -6px;
+    }
+
+    .theme-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .theme-card {
+        position: relative;
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        padding: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.2s ease;
+    }
+    .theme-card:hover, .theme-card.active { border-color: var(--accent); }
+
+    .theme-card .swatch {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        flex-shrink: 0;
+        position: relative;
+    }
+    .theme-card .swatch.rgb {
+        background: conic-gradient(#ff0080, #00e5ff, #00ff88, #b388ff, #ff0080);
+        animation: spin 6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .theme-card .theme-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .theme-card .theme-name {
+        font-size: 0.8rem; font-weight: 800; color: var(--text);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .theme-card .theme-desc { font-size: 0.65rem; color: var(--muted); font-weight: 600; }
+
+    .theme-card .checkmark {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: var(--accent-text);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 900;
+    }
+    .theme-card.active .checkmark { display: flex; }
+
+    .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: var(--panel);
+        border: 1px solid var(--accent);
+        color: var(--text);
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        z-index: 2000;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 360px) {
+        body.mode-mobile .char { width: 28px; height: 38px; font-size: 1.2rem; }
+        body.mode-mobile .row { height: 42px; gap: 5px; font-size: 1.2rem; }
+        body.mode-mobile .rows-viewport { height: 200px; }
+        body.mode-mobile .key { padding: 8px 2px; font-size: 0.78rem; min-height: 40px; }
+        body.mode-mobile .key.tall { min-height: 84px; }
+        body.mode-mobile .stat-box .value { font-size: 0.95rem; }
+    }
+</style>
+</head>
+<body class="mode-desktop">
+
+<div class="app">
+    <header>
+        <h1>NumPad <span class="accent">Typing Test</span></h1>
+        <div class="controls">
+            <div class="control-group">
+                <label>Mode</label>
+                <button class="mode-btn active" data-mode="test">Test</button>
+                <button class="mode-btn" data-mode="practice">Practice</button>
+            </div>
+            <div class="control-group">
+                <label>Keys</label>
+                <button class="mode-btn active" data-content="simple">Simple</button>
+                <button class="mode-btn" data-content="mixed">Mixed</button>
+            </div>
+            <div class="control-group timer-options" id="timer-options">
+                <button class="time-btn" data-time="30">30s</button>
+                <button class="time-btn active" data-time="60">1m</button>
+                <button class="time-btn" data-time="120">2m</button>
+                <button class="time-btn" data-time="300">5m</button>
+            </div>
+
+            <!-- Display Mode Toggle -->
+            <div class="display-mode-group" title="Display Mode">
+                <button class="display-btn active" data-display="desktop" title="Desktop Mode" aria-label="Desktop Mode">🖥️</button>
+                <button class="display-btn" data-display="mobile" title="Mobile Mode" aria-label="Mobile Mode">📱</button>
+            </div>
+
+            <button class="theme-btn" id="theme-open-btn">
+                <span class="theme-icon">🎨</span> Theme
+            </button>
+        </div>
+    </header>
+
+    <div class="stats-grid">
+        <div class="stat-box"><div class="label">CPM</div><div class="value" id="cpm">0</div></div>
+        <div class="stat-box"><div class="label">WPM</div><div class="value" id="wpm">0</div></div>
+        <div class="stat-box"><div class="label">Accuracy</div><div class="value" id="accuracy">100%</div></div>
+        <div class="stat-box"><div class="label">Errors</div><div class="value" id="errors">0</div></div>
+        <div class="stat-box"><div class="label" data-label="time">Time</div><div class="value" id="time">60s</div></div>
+        <div class="stat-box"><div class="label">Rows</div><div class="value" id="completed-rows">0</div></div>
+    </div>
+
+    <main class="typing-area">
+        <div class="rows-viewport">
+            <div class="rows-container" id="rows-container"></div>
+        </div>
+    </main>
+
+    <div class="training-guide">
+        <span class="gi">🎯 <strong>Type the middle row</strong></span>
+        <span class="gs">·</span>
+        <span class="gi">↵ <strong>NUMPAD ENTER</strong> to advance</span>
+        <span class="gs">·</span>
+        <span class="gi">❌ <strong>Wrong key = red</strong></span>
+    </div>
+
+    <div class="numpad-container">
+        <div class="numpad">
+            <div class="key num" data-code="NumLock">Num</div>
+            <div class="key" data-code="NumpadDivide">/</div>
+            <div class="key" data-code="NumpadMultiply">*</div>
+            <div class="key" data-code="NumpadSubtract">-</div>
+
+            <div class="key" data-code="Numpad7">7</div>
+            <div class="key" data-code="Numpad8">8</div>
+            <div class="key" data-code="Numpad9">9</div>
+            <div class="key tall" data-code="NumpadAdd">+</div>
+
+            <div class="key" data-code="Numpad4">4</div>
+            <div class="key" data-code="Numpad5">5</div>
+            <div class="key" data-code="Numpad6">6</div>
+
+            <div class="key" data-code="Numpad1">1</div>
+            <div class="key" data-code="Numpad2">2</div>
+            <div class="key" data-code="Numpad3">3</div>
+            <div class="key tall" data-code="NumpadEnter" id="enter-key">Enter</div>
+
+            <div class="key wide" data-code="Numpad0">0</div>
+            <div class="key" data-code="NumpadDecimal">.</div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Press <strong>NUMPAD ENTER</strong> after completing the middle row.</p>
+        <button class="restart-btn" id="restart-btn">Restart</button>
+    </footer>
+</div>
+
+<!-- ===================== THEME MODAL ===================== -->
+<div class="theme-modal" id="theme-modal">
+    <div class="theme-panel">
+        <div class="theme-header">
+            <h2>Choose Theme</h2>
+            <button class="theme-close" id="theme-close-btn">✕</button>
+        </div>
+        <p class="theme-subtitle">Click any theme to apply instantly.</p>
+        <div class="theme-grid" id="theme-grid"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   THEME PRESETS
+   ========================================================= */
+const THEMES = {
+    darkCyan: {
+        name: 'Dark Cyan', desc: 'Professional default', swatch: '#22d3ee',
+        vars: {
+            '--bg':'#0e0f12','--panel':'#16181c','--card':'#1d2026','--text':'#f5f7fa','--muted':'#8b93a1',
+            '--accent':'#22d3ee','--accent-text':'#0a0d10','--accent-soft':'rgba(34,211,238,0.14)',
+            '--success':'#4ade80','--error':'#ef4444','--error-soft':'rgba(239,68,68,0.18)',
+            '--enter':'#22d3ee','--enter-soft':'rgba(34,211,238,0.14)',
+            '--key':'#242830','--key-text':'#a7aebc','--key-hover':'#2e333c','--border':'#2a2f38','--shadow':'rgba(0,0,0,0.6)'
+        }
+    },
+    rgbGamer: {
+        name: 'RGB Gamer', desc: 'Animated accents', rgb: true, swatch: 'rgb',
+        vars: {
+            '--bg':'#0a0b12','--panel':'#12131c','--card':'#181a26','--text':'#ffffff','--muted':'#8a8faa',
+            '--accent':'#e879f9','--accent-text':'#0a0b12','--accent-soft':'rgba(232,121,249,0.16)',
+            '--success':'#4ade80','--error':'#ef4444','--error-soft':'rgba(239,68,68,0.18)',
+            '--enter':'#22d3ee','--enter-soft':'rgba(34,211,238,0.14)',
+            '--key':'#1c1e2c','--key-text':'#9ba0b8','--key-hover':'#262a3a','--border':'#282b3e','--shadow':'rgba(0,0,0,0.7)'
+        }
+    },
+    neonPurple: {
+        name: 'Neon Purple', desc: 'Vibrant purple', swatch: '#b388ff',
+        vars: {
+            '--bg':'#0d0a14','--panel':'#151226','--card':'#1c1833','--text':'#f0eaff','--muted':'#9588bb',
+            '--accent':'#b388ff','--accent-text':'#0d0a14','--accent-soft':'rgba(179,136,255,0.16)',
+            '--success':'#4ade80','--error':'#ef4444','--error-soft':'rgba(239,68,68,0.18)',
+            '--enter':'#b388ff','--enter-soft':'rgba(179,136,255,0.14)',
+            '--key':'#221a3a','--key-text':'#a394c2','--key-hover':'#2d2350','--border':'#2a2040','--shadow':'rgba(0,0,0,0.65)'
+        }
+    },
+    electricBlue: {
+        name: 'Electric Blue', desc: 'Bold blue', swatch: '#3b82f6',
+        vars: {
+            '--bg':'#0a1024','--panel':'#0f1830','--card':'#152040','--text':'#e0ecff','--muted':'#7f9cc4',
+            '--accent':'#3b82f6','--accent-text':'#ffffff','--accent-soft':'rgba(59,130,246,0.18)',
+            '--success':'#4ade80','--error':'#ef4444','--error-soft':'rgba(239,68,68,0.18)',
+            '--enter':'#3b82f6','--enter-soft':'rgba(59,130,246,0.14)',
+            '--key':'#1a2a4a','--key-text':'#8aa8d0','--key-hover':'#243858','--border':'#1c2a48','--shadow':'rgba(0,0,0,0.65)'
+        }
+    },
+    greenMatrix: {
+        name: 'Green Matrix', desc: 'Hacker green', swatch: '#22c55e',
+        vars: {
+            '--bg':'#050a06','--panel':'#0c1410','--card':'#122018','--text':'#d8ffd8','--muted':'#6f9a7a',
+            '--accent':'#22c55e','--accent-text':'#05100a','--accent-soft':'rgba(34,197,94,0.16)',
+            '--success':'#4ade80','--error':'#ef4444','--error-soft':'rgba(239,68,68,0.18)',
+            '--enter':'#22c55e','--enter-soft':'rgba(34,197,94,0.14)',
+            '--key':'#16241c','--key-text':'#83a78d','--key-hover':'#1f3226','--border':'#1f2e22','--shadow':'rgba(0,0,0,0.65)'
+        }
+    },
+    redCyber: {
+        name: 'Red Cyber', desc: 'Aggressive red', swatch: '#ef4444',
+        vars: {
+            '--bg':'#0d0606','--panel':'#1a0e0e','--card':'#241414','--text':'#ffe5e5','--muted':'#b08a8a',
+            '--accent':'#ef4444','--accent-text':'#ffffff','--accent-soft':'rgba(239,68,68,0.18)',
+            '--success':'#4ade80','--error':'#ff2e2e','--error-soft':'rgba(255,46,46,0.2)',
+            '--enter':'#ef4444','--enter-soft':'rgba(239,68,68,0.14)',
+            '--key':'#2a1414','--key-text':'#b08a8a','--key-hover':'#3a1c1c','--border':'#331717','--shadow':'rgba(0,0,0,0.65)'
+        }
+    },
+    lightClean: {
+        name: 'Light Clean', desc: 'Bright minimal', swatch: '#0ea5e9',
+        vars: {
+            '--bg':'#f4f6f9','--panel':'#ffffff','--card':'#f7f9fc','--text':'#0f172a','--muted':'#64748b',
+            '--accent':'#0ea5e9','--accent-text':'#ffffff','--accent-soft':'rgba(14,165,233,0.14)',
+            '--success':'#16a34a','--error':'#dc2626','--error-soft':'rgba(220,38,38,0.15)',
+            '--enter':'#0ea5e9','--enter-soft':'rgba(14,165,233,0.12)',
+            '--key':'#e8edf3','--key-text':'#475569','--key-hover':'#dbe2ea','--border':'#cfd7e1','--shadow':'rgba(15,23,42,0.12)'
+        }
+    }
+};
+
+const DEFAULT_THEME = 'darkCyan';
+const THEME_KEY = 'numpad-theme-simple-v2';
+const DISPLAY_KEY = 'numpad-display-mode-v1';
+const DEFAULT_DISPLAY = 'desktop';
+
+function applyTheme(themeKey) {
+    const theme = THEMES[themeKey];
+    if (!theme) return;
+    const root = document.documentElement;
+    Object.entries(theme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+    document.documentElement.classList.toggle('rgb-mode', !!theme.rgb);
+    try { localStorage.setItem(THEME_KEY, themeKey); } catch(e){}
+    updateActiveCard(themeKey);
+}
+
+const themeGrid = document.getElementById('theme-grid');
+
+function buildThemeGrid() {
+    themeGrid.innerHTML = '';
+    Object.entries(THEMES).forEach(([key, theme]) => {
+        const card = document.createElement('div');
+        card.className = 'theme-card';
+        card.dataset.theme = key;
+
+        const swatch = document.createElement('div');
+        swatch.className = 'swatch' + (theme.rgb ? ' rgb' : '');
+        if (!theme.rgb) swatch.style.background = theme.swatch;
+        card.appendChild(swatch);
+
+        const info = document.createElement('div');
+        info.className = 'theme-info';
+        const nameEl = document.createElement('div');
+        nameEl.className = 'theme-name';
+        nameEl.textContent = theme.name;
+        info.appendChild(nameEl);
+        const descEl = document.createElement('div');
+        descEl.className = 'theme-desc';
+        descEl.textContent = theme.desc;
+        info.appendChild(descEl);
+        card.appendChild(info);
+
+        const check = document.createElement('div');
+        check.className = 'checkmark';
+        check.textContent = '✓';
+        card.appendChild(check);
+
+        card.addEventListener('click', () => {
+            applyTheme(key);
+            showToast(`Theme: ${theme.name}`);
+        });
+
+        themeGrid.appendChild(card);
+    });
+}
+
+function updateActiveCard(themeKey) {
+    themeGrid.querySelectorAll('.theme-card').forEach(c => {
+        c.classList.toggle('active', c.dataset.theme === themeKey);
+    });
+}
+
+const toastEl = document.getElementById('toast');
+let toastTimeout;
+function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toastEl.classList.remove('show'), 1500);
+}
+
+const modal = document.getElementById('theme-modal');
+document.getElementById('theme-open-btn').addEventListener('click', () => modal.classList.add('open'));
+document.getElementById('theme-close-btn').addEventListener('click', () => modal.classList.remove('open'));
+modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal.classList.remove('open'); });
+
+/* =========================================================
+   DISPLAY MODE
+   ========================================================= */
+const displayBtns = document.querySelectorAll('.display-btn');
+
+function applyDisplayMode(mode) {
+    const validMode = (mode === 'mobile' || mode === 'desktop') ? mode : DEFAULT_DISPLAY;
+    document.body.classList.remove('mode-desktop', 'mode-mobile');
+    document.body.classList.add('mode-' + validMode);
+
+    displayBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.display === validMode);
+    });
+
+    try { localStorage.setItem(DISPLAY_KEY, validMode); } catch(e){}
+
+    requestAnimationFrame(() => {
+        rowsContainer.style.transition = 'none';
+        rowsContainer.style.transform = 'translateY(0)';
+        void rowsContainer.offsetHeight;
+        rowsContainer.style.transition = 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)';
+    });
+}
+
+function detectInitialDisplayMode() {
+    try {
+        const saved = localStorage.getItem(DISPLAY_KEY);
+        if (saved === 'mobile' || saved === 'desktop') return saved;
+    } catch(e){}
+
+    const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    const narrowScreen = window.innerWidth <= 820;
+    const ua = navigator.userAgent || '';
+    const isMobileUA = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(ua);
+
+    if (isMobileUA || (isTouch && narrowScreen)) return 'mobile';
+    return 'desktop';
+}
+
+displayBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        applyDisplayMode(btn.dataset.display);
+        showToast(btn.dataset.display === 'mobile' ? '📱 Mobile Mode' : '🖥️ Desktop Mode');
+    });
+});
+
+/* =========================================================
+   NUMPAD TYPING LOGIC
+   ========================================================= */
+const state = {
+    mode: 'test',
+    contentMode: 'simple',
+    isRunning: false,
+    isFinished: false,
+    isTransitioning: false,
+    timeLimit: 60,
+    timeLeft: 60,
+    timerInterval: null,
+    stats: { correct: 0, errors: 0, totalTyped: 0, completedRows: 0, startTime: 0 },
+    rows: [],
+    currentChar: 0,
+    hasError: false,
+    justCompleted: null
+};
+const ACTIVE_ROW_INDEX = 1;
+
+const rowsContainer   = document.getElementById('rows-container');
+const cpmEl           = document.getElementById('cpm');
+const wpmEl           = document.getElementById('wpm');
+const accuracyEl      = document.getElementById('accuracy');
+const errorsEl        = document.getElementById('errors');
+const timeEl          = document.getElementById('time');
+const completedRowsEl = document.getElementById('completed-rows');
+const timerOptions    = document.getElementById('timer-options');
+const enterKeyEl      = document.getElementById('enter-key');
+
+function bumpValue(el, newValue) {
+    if (el.textContent !== String(newValue)) {
+        el.textContent = newValue;
+        el.classList.remove('bump');
+        void el.offsetWidth;
+        el.classList.add('bump');
+        setTimeout(() => el.classList.remove('bump'), 350);
+    }
+}
+function flashError(el) {
+    el.classList.remove('flash-error');
+    void el.offsetWidth;
+    el.classList.add('flash-error');
+    setTimeout(() => el.classList.remove('flash-error'), 350);
+}
+
+function generateRow() {
+    const length = Math.floor(Math.random() * 4) + 4;
+    const pool = state.contentMode === 'mixed' ? '0123456789+-*/' : '0123456789';
+    const row = [];
+    for (let i = 0; i < length; i++) row.push(pool[Math.floor(Math.random() * pool.length)]);
+    return row;
+}
+function initRows() {
+    state.rows = [];
+    for (let i = 0; i < 4; i++) state.rows.push(generateRow());
+    state.currentChar = 0;
+    state.hasError = false;
+    state.justCompleted = null;
+    render();
+}
+
+function render() {
+    rowsContainer.innerHTML = '';
+    const activeRow = state.rows[ACTIVE_ROW_INDEX];
+    const rowComplete = state.currentChar >= activeRow.length;
+
+    state.rows.forEach((row, rIndex) => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'row';
+        row.forEach((char, cIndex) => {
+            const charEl = document.createElement('span');
+            charEl.className = 'char';
+            charEl.textContent = char;
+            if (rIndex < ACTIVE_ROW_INDEX) charEl.classList.add('completed');
+            else if (rIndex === ACTIVE_ROW_INDEX) {
+                if (cIndex < state.currentChar) charEl.classList.add('completed');
+                else if (cIndex === state.currentChar && !rowComplete) {
+                    charEl.classList.add('current');
+                    if (state.hasError) charEl.classList.add('error');
+                }
+            }
+            rowEl.appendChild(charEl);
+        });
+        if (rIndex === ACTIVE_ROW_INDEX && rowComplete) {
+            const ind = document.createElement('span');
+            ind.className = 'enter-indicator visible';
+            ind.textContent = '↵ ENTER';
+            rowEl.appendChild(ind);
+        }
+        rowsContainer.appendChild(rowEl);
+    });
+
+    if (state.justCompleted) {
+        const { row, col } = state.justCompleted;
+        const rowEl = rowsContainer.children[row];
+        if (rowEl) {
+            const charEl = rowEl.querySelectorAll('.char')[col];
+            if (charEl) charEl.classList.add('pop');
+        }
+        state.justCompleted = null;
+    }
+
+    if (rowComplete) enterKeyEl.classList.add('active');
+    else enterKeyEl.classList.remove('active');
+
+    updateStatsUI();
+}
+
+function updateStatsUI() {
+    let cpm = 0, wpm = 0;
+    if (state.stats.startTime > 0) {
+        const elapsedMinutes = (Date.now() - state.stats.startTime) / 60000;
+        if (elapsedMinutes > 0 && state.stats.correct > 0) {
+            cpm = Math.round(state.stats.correct / elapsedMinutes);
+            wpm = Math.round(cpm / 5);
+        }
+    }
+    const accuracy = state.stats.totalTyped > 0
+        ? Math.round((state.stats.correct / state.stats.totalTyped) * 100) : 100;
+
+    bumpValue(cpmEl, cpm);
+    bumpValue(wpmEl, wpm);
+    bumpValue(accuracyEl, accuracy + '%');
+    bumpValue(completedRowsEl, state.stats.completedRows);
+
+    if (errorsEl.textContent !== String(state.stats.errors)) {
+        errorsEl.textContent = state.stats.errors;
+        flashError(errorsEl);
+    }
+    if (state.mode === 'test') timeEl.textContent = state.timeLeft + 's';
+    else {
+        const s = state.stats.startTime > 0 ? Math.floor((Date.now() - state.stats.startTime) / 1000) : 0;
+        timeEl.textContent = s + 's';
+    }
+}
+
+function startTimer() {
+    state.isRunning = true;
+    state.stats.startTime = Date.now();
+    state.timeLeft = state.timeLimit;
+    updateStatsUI();
+    state.timerInterval = setInterval(() => {
+        state.timeLeft--;
+        updateStatsUI();
+        if (state.timeLeft <= 0) endTest();
+    }, 1000);
+}
+function endTest() {
+    clearInterval(state.timerInterval);
+    state.isRunning = false;
+    state.isFinished = true;
+    enterKeyEl.classList.remove('active');
+    updateStatsUI();
+    const overlay = document.createElement('div');
+    overlay.className = 'test-complete';
+    overlay.innerHTML = `
+        <h2>Test Complete</h2>
+        <p>CPM: ${cpmEl.textContent} &nbsp;|&nbsp; WPM: ${wpmEl.textContent} &nbsp;|&nbsp; Accuracy: ${accuracyEl.textContent}</p>
+        <p>Completed Rows: ${completedRowsEl.textContent}</p>
+        <p>Press Restart to try again.</p>
+    `;
+    document.querySelector('.typing-area').appendChild(overlay);
+}
+
+function moveToNextRow() {
+    if (state.isTransitioning) return;
+    state.isTransitioning = true;
+    enterKeyEl.classList.remove('active');
+
+    const firstRow = rowsContainer.querySelector('.row');
+    let step = 72;
+    if (firstRow) {
+        const rect = firstRow.getBoundingClientRect();
+        const gap = parseFloat(getComputedStyle(rowsContainer).gap) || 12;
+        step = Math.round(rect.height + gap);
+    }
+
+    rowsContainer.style.transform = `translateY(-${step}px)`;
+    setTimeout(() => {
+        state.rows.shift();
+        state.rows.push(generateRow());
+        state.currentChar = 0;
+        state.hasError = false;
+        state.stats.completedRows++;
+        rowsContainer.style.transition = 'none';
+        rowsContainer.style.transform = 'translateY(0)';
+        render();
+        void rowsContainer.offsetHeight;
+        rowsContainer.style.transition = 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)';
+        state.isTransitioning = false;
+    }, 320);
+}
+
+function handleKeyDown(e) {
+    if (state.isFinished) return;
+    if (!e.code || !e.code.startsWith('Numpad')) return;
+    e.preventDefault();
+
+    const keyEl = document.querySelector(`.key[data-code="${e.code}"]`);
+    if (keyEl) {
+        keyEl.classList.add('active');
+        setTimeout(() => keyEl.classList.remove('active'), 120);
+    }
+    if (state.mode === 'test' && !state.isRunning) startTimer();
+    if (e.code === 'NumpadEnter') {
+        if (state.currentChar >= state.rows[ACTIVE_ROW_INDEX].length) moveToNextRow();
+        return;
+    }
+    let pressed = null;
+    const numMatch = e.code.match(/^Numpad([0-9])$/);
+    if (numMatch) pressed = numMatch[1];
+    else if (e.code === 'NumpadAdd')      pressed = '+';
+    else if (e.code === 'NumpadSubtract') pressed = '-';
+    else if (e.code === 'NumpadMultiply') pressed = '*';
+    else if (e.code === 'NumpadDivide')   pressed = '/';
+    if (pressed === null) return;
+
+    const expected = state.rows[ACTIVE_ROW_INDEX][state.currentChar];
+    if (pressed === expected) {
+        state.stats.correct++;
+        state.stats.totalTyped++;
+        state.justCompleted = { row: ACTIVE_ROW_INDEX, col: state.currentChar };
+        state.currentChar++;
+        state.hasError = false;
+        render();
+    } else {
+        state.stats.errors++;
+        state.stats.totalTyped++;
+        state.hasError = true;
+        render();
+        setTimeout(() => { state.hasError = false; render(); }, 340);
+    }
+}
+
+function setMode(mode) {
+    state.mode = mode;
+    resetTest();
+    document.querySelectorAll('.mode-btn[data-mode]').forEach(btn =>
+        btn.classList.toggle('active', btn.dataset.mode === mode));
+    timerOptions.style.display = mode === 'test' ? 'flex' : 'none';
+    const timeLabel = document.querySelector('.stat-box .label[data-label="time"]');
+    if (timeLabel) timeLabel.textContent = mode === 'test' ? 'Time' : 'Elapsed';
+    if (mode === 'practice') timeEl.textContent = '0s';
+}
+function setContentMode(cm) {
+    state.contentMode = cm;
+    resetTest();
+    document.querySelectorAll('.mode-btn[data-content]').forEach(btn =>
+        btn.classList.toggle('active', btn.dataset.content === cm));
+}
+function resetTest() {
+    clearInterval(state.timerInterval);
+    state.isRunning = false;
+    state.isFinished = false;
+    state.isTransitioning = false;
+    state.stats = { correct: 0, errors: 0, totalTyped: 0, completedRows: 0, startTime: 0 };
+    state.timeLeft = state.timeLimit;
+    state.hasError = false;
+    const overlay = document.querySelector('.test-complete');
+    if (overlay) overlay.remove();
+    rowsContainer.style.transition = 'none';
+    rowsContainer.style.transform = 'translateY(0)';
+    void rowsContainer.offsetHeight;
+    rowsContainer.style.transition = 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)';
+    initRows();
+}
+
+window.addEventListener('keydown', handleKeyDown);
+document.querySelectorAll('.mode-btn[data-mode]').forEach(btn =>
+    btn.addEventListener('click', () => setMode(btn.dataset.mode)));
+document.querySelectorAll('.mode-btn[data-content]').forEach(btn =>
+    btn.addEventListener('click', () => setContentMode(btn.dataset.content)));
+document.querySelectorAll('.time-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        state.timeLimit = parseInt(btn.dataset.time);
+        state.timeLeft = state.timeLimit;
+        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        resetTest();
+    });
+});
+document.getElementById('restart-btn').addEventListener('click', () => {
+    resetTest();
+    setMode(state.mode);
+});
+
+/* =========================================================
+   INIT
+   ========================================================= */
+(function boot() {
+    applyDisplayMode(detectInitialDisplayMode());
+    buildThemeGrid();
+    let savedTheme = DEFAULT_THEME;
+    try {
+        const s = localStorage.getItem(THEME_KEY);
+        if (s && THEMES[s]) savedTheme = s;
+    } catch(e){}
+    applyTheme(savedTheme);
+    initRows();
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            rowsContainer.style.transition = 'none';
+            rowsContainer.style.transform = 'translateY(0)';
+            void rowsContainer.offsetHeight;
+            rowsContainer.style.transition = 'transform 0.32s cubic-bezier(0.4, 0, 0.2, 1)';
+        }, 150);
+    });
+})();
+</script>
+</body>
+</html>
